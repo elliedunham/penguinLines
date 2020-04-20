@@ -1,0 +1,253 @@
+<html>
+    <head>
+       <script src="https://d3js.org/d3.v5.min.js"></script>
+   
+   <link rel="stylesheet" type="text/css"
+          href="penguin.css">
+    
+    </head>
+<body>
+    
+    <div id = tooltip class =hidden>
+    <div>
+        
+        </div>
+    </div>
+    
+    
+    
+    <script>
+    var penguinPromise = d3.json("classData.json");
+    
+    penguinPromise.then(function(penguins)
+                       {
+        console.log(penguins);
+        displayGraph(penguins);
+        allPoints(penguins);
+      
+    },
+        function(error)
+                       {
+
+    console.log(error);
+    })
+    
+    var getGrade = function(penguin)
+    {
+        return penguin.grade;
+        
+    }
+    var getDay = function(penguin)
+    {
+        return penguin.day;
+    }
+    
+    var getQuizGrade = function(p)
+     {return p.quizes.map(getGrade);
+      
+     }
+     var getQuizDay = function(p)
+     {
+         return p.quizes.map(getDay);
+     }
+
+    var padding = 20;
+     var width = 600;
+     var height = 400;   
+        
+    
+     var xScale = d3.scaleLinear()
+                .domain([0,40])
+                .range([padding,width-padding])
+     
+     
+     var yScale =d3.scaleLinear()
+                    .domain([0 ,10])
+                    .range([height-padding,padding])
+    var displayGraph = function(penguin)
+    { 
+     
+      var svg = d3.select("body") 
+                    .append("svg")
+                    .attr("height", height)
+                    .attr("width", width);
+    svg.append("g")
+        .attr("class", "graph");
+      
+     
+     
+    makeLines(penguin, svg);
+    
+        
+    
+    var xAxis = d3.axisBottom(xScale)
+                    .ticks(10);
+     
+     svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0,"+ (height-padding)+")")
+            .call(xAxis);
+        
+     var yAxis = d3.axisLeft()
+                .scale(yScale)
+                .ticks(10);
+     
+     svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate("+padding+",0)")
+        .call(yAxis);
+    }
+    
+    var makeLines = function(penguin, svg)
+    { 
+      var lineGenerator = d3.line()
+                    .x(function(d)
+                       { 
+                        return xScale(d.day);
+                       })
+                    .y(function(d)
+                      {
+                        return yScale (d.grade);
+                    })
+                    .curve(d3.curveCardinal);
+    var lines = d3.select("svg")   
+                    .select(".graph")
+                    .selectAll("g")
+                    .data(penguin)
+                    .enter()
+                    .append("g")
+                    .attr("id", function(penguin,i)
+                         {
+                          return i;
+                          })
+                    .classed("line", true)
+                    .attr("stroke", "black")
+                    .attr("fill", "none")
+                    .attr("stroke-width", 2)
+                    .on("mouseover",function(subject)
+                    {   
+                        if(! d3.select(this).classed("off"))
+                    {
+                            d3.selectAll(".line")
+                                .classed("fade",true);
+            
+                            d3.select(this)
+                                .classed("fade",false)
+                                .raise(); 
+                    }
+                    var num = this.id;
+                    var identity = parseFloat(num);
+                    drawToolTip(penguin, identity);
+        
+                    
+})
+                    .on("mouseout",function(subject)
+                        {
+    if(! d3.select(this).classed("off"))
+    {
+        d3.selectAll(".line")
+        .classed("fade",false);
+    }
+d3.select("#tooltip").classed("hidden", true);
+})
+                    
+        
+    lines.append("path")
+        .datum(function(penguin)
+              {
+        return penguin.quizes;
+    })
+        .attr("class", "line")
+        .attr("d", lineGenerator);
+        
+ 
+    }
+
+         
+        
+    
+var drawToolTip = function(penguin, num)
+{   
+   
+    
+    d3.select("#tooltip div")
+        .remove();
+    
+    var xPosition = d3.event.pageX;
+    var yPosition = d3.event.pageY;
+
+    
+    var base = d3.select("#tooltip")
+        .classed("hidden",false)
+        .style("top",yPosition+"px")
+        .style("left",xPosition+"px")
+        .append("div")
+    
+    
+    base.append("div")
+        .classed("picture", true)
+        
+      
+
+    var PPicture = base.append("div")
+        .classed("picture", true)
+    
+    PPicture.append("div")
+        .classed("pic", true)
+        .append("img")
+        .attr("src", function()
+             {
+    return "imgs/" + penguin[num].picture;
+    })  
+        .attr("height", 100)
+        .attr("width", 100)
+    
+}
+
+var allPoints = function(penguin)
+{
+    var dots = d3.select("svg")
+   
+
+    dots.selectAll("circle")
+        .data(penguin)
+        .enter()
+        .append("circle")
+        .attr("cx", function(peng, index)
+             {
+            return penguin.quizes[index].map(getDay);
+    
+            })
+        .attr("cy", function(peng, index)
+             {
+        
+            return penguin.quizes[index].map(getGrade);
+        
+            })
+        .attr("r", 4)
+        .attr("fill", "red")
+        .attr("id", "hidden")
+    
+
+    
+}
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    </script>
+    </body>
+
+
+
+
+
+
+</html>

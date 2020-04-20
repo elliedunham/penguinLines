@@ -1,0 +1,27 @@
+.off, .fade
+{
+    
+    opacity: .1;
+}
+#tooltip.hidden
+{
+    display: none;
+}
+
+#tooltip
+{
+     position: absolute;
+    display: block;
+    width: auto;
+    height: auto;
+ 
+    pointer-events: none;
+   margin-bottom: auto;
+    
+    
+}
+
+//
+{
+    display: none;
+}
